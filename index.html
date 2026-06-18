@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Baba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Ms+Madi&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F1E3;
+    --paper-soft:#FBF8EF;
+    --cornflower:#5C77C7;
+    --grass:#6B9C53;
+    --mustard:#E8AE3B;
+    --coral:#E2562F;
+    --magenta:#D5588C;
+    --pink:#EE82A6;
+    --yellow:#F4D35E;
+    --ink:#1C1B18;
+    --shadow:rgba(28,27,24,0.22);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Jost', sans-serif;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* grain texture overlay across the whole page */
+  .grain{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    pointer-events:none;
+    opacity:0.18;
+    mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1,h2{
+    font-family:'Jost', sans-serif;
+    font-weight:700;
+    margin:0;
+  }
+
+  .eyebrow{
+    display:inline-block;
+    font-family:'Jost', sans-serif;
+    font-weight:600;
+    font-size:0.68rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--coral);
+  }
+
+  button{
+    font-family:'Jost', sans-serif;
+    font-weight:600;
+    cursor:pointer;
+    border:none;
+  }
+
+  button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--mustard);
+    outline-offset:3px;
+  }
+
+  /* ---- reusable decorative stickers (stars / clouds) ---- */
+  .deco{
+    position:absolute;
+    width:34px; height:34px;
+    pointer-events:none;
+  }
+  .deco.lg{ width:50px; height:50px; }
+  .deco.sm{ width:20px; height:20px; }
+  .deco.coral{ color:var(--coral); }
+  .deco.mustard{ color:var(--mustard); }
+  .deco.magenta{ color:var(--magenta); }
+  .deco.cornflower{ color:var(--cornflower); }
+  .deco.grass{ color:var(--grass); }
+  .deco svg{ width:100%; height:100%; fill:currentColor; display:block; }
+
+  /* ============ HERO / GIFT BOX ============ */
+  .hero{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:5vh 5vw 4vh;
+    text-align:center;
+    position:relative;
+    background:var(--paper-soft);
+    overflow:hidden;
+  }
+
+  .gift-wrap{
+    position:relative;
+    width:min(260px, 58vw);
+    height:240px;
+    cursor:pointer;
+    transition:transform 0.25s ease;
+  }
+  .gift-wrap:hover{ transform:scale(1.04); }
+  .gift-wrap.opened{ cursor:default; }
+
+  .gift-box{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:62%;
+    background:var(--pink);
+    border-radius:6px 6px 14px 14px;
+    box-shadow:0 18px 36px var(--shadow);
+    overflow:hidden;
+    animation: boxGlow 2.2s ease-in-out infinite;
+  }
+  .gift-wrap.opened .gift-box{ animation:none; }
+  .gift-box::before{
+    content:"";
+    position:absolute; top:0; bottom:0; left:50%;
+    width:15%;
+    transform:translateX(-50%);
+    background:var(--yellow);
+  }
+
+  @keyframes boxGlow{
+    0%, 100%{ box-shadow:0 18px 36px var(--shadow); }
+    50%{ box-shadow:0 18px 36px var(--shadow), 0 0 32px 4px rgba(244,211,94,0.55); }
+  }
+
+  .gift-lid{
+    position:absolute;
+    left:-4%; right:-4%;
+    top:22%;
+    height:22%;
+    background:var(--pink);
+    filter:brightness(0.96);
+    border-radius:10px;
+    box-shadow:0 10px 18px var(--shadow);
+    transform-origin:10% 100%;
+    transition:transform 0.7s cubic-bezier(.3,.6,.3,1), opacity 0.5s ease 0.1s;
+    z-index:3;
+  }
+  .gift-lid::before{
+    content:"";
+    position:absolute; top:0; bottom:0; left:50%;
+    width:14%;
+    transform:translateX(-50%);
+    background:var(--yellow);
+  }
+  .gift-wrap.opened .gift-lid{
+    transform:translateY(-180px) translateX(-20px) rotate(-50deg);
+    opacity:0;
+  }
+
+  .bow{
+    position:absolute;
+    left:50%;
+    top:-58%;
+    width:44%;
+    height:60%;
+    transform:translateX(-50%);
+    z-index:4;
+  }
+  .bow-loop{
+    position:absolute;
+    width:62%;
+    height:78%;
+    background:var(--yellow);
+    border-radius:50% 50% 50% 4%;
+    top:14%;
+  }
+  .bow-loop.left{ left:-6%; transform:rotate(-28deg); }
+  .bow-loop.right{ right:-6%; transform:rotate(28deg) scaleX(-1); }
+  .bow-knot{
+    position:absolute;
+    left:50%; top:46%;
+    width:26%; height:26%;
+    background:var(--yellow);
+    border-radius:3px;
+    transform:translate(-50%,-50%) rotate(45deg);
+  }
+
+  .reveal-text{
+    margin-top:2.6rem;
+    opacity:0;
+    transform:translateY(14px) scale(0.97);
+    transition:opacity 0.6s ease, transform 0.6s ease;
+    max-width:480px;
+  }
+  .reveal-text.show{ opacity:1; transform:translateY(0) scale(1); }
+  .reveal-text h1{
+    font-family:'Jost', sans-serif;
+    font-weight:600;
+    font-size:clamp(1.7rem, 5vw, 2.6rem);
+    line-height:1.15;
+    color:var(--ink);
+  }
+  .reveal-text h1 .accent{ color:var(--coral); }
+
+  .confetti-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:40;
+  }
+  .confetti-piece{
+    position:absolute;
+    top:-10vh;
+    opacity:0;
+    border-radius:1px;
+    animation-name:confettiFall;
+    animation-timing-function:linear;
+    animation-fill-mode:forwards;
+  }
+  @keyframes confettiFall{
+    0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(120vh) translateX(var(--drift,0px)) rotate(540deg); opacity:0.95; }
+  }
+
+  /* ---- photo carousel modal ---- */
+  .carousel-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(28,27,24,0.78);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:60;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.4s ease;
+    padding:5vh 4vw;
+  }
+  .carousel-overlay.show{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .carousel-box{
+    position:relative;
+    width:min(640px, 100%);
+    transform:scale(0.92);
+    transition:transform 0.4s ease;
+  }
+  .carousel-overlay.show .carousel-box{ transform:scale(1); }
+
+  .carousel-frame{
+    position:relative;
+    width:100%;
+    aspect-ratio:4/3;
+    background:var(--ink);
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 20px 48px rgba(0,0,0,0.45);
+  }
+  .carousel-frame img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    opacity:0;
+    transition:opacity 0.45s ease;
+  }
+  .carousel-frame img.active{ opacity:1; }
+
+  .carousel-arrow{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(255,255,255,0.92);
+    color:var(--ink);
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    font-size:1.1rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 6px 14px rgba(0,0,0,0.3);
+  }
+  .carousel-arrow.prev{ left:-14px; }
+  .carousel-arrow.next{ right:-14px; }
+
+  .carousel-close{
+    position:absolute;
+    top:-44px;
+    right:0;
+    background:none;
+    color:var(--paper-soft);
+    font-size:0.85rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+
+  .carousel-dots{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    margin-top:1rem;
+  }
+  .carousel-dots span{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.4);
+    cursor:pointer;
+  }
+  .carousel-dots span.active{ background:var(--mustard); }
+
+  @media (max-width:560px){
+    .carousel-arrow.prev{ left:4px; }
+    .carousel-arrow.next{ right:4px; }
+  }
+
+  /* ---- now-playing music widget ---- */
+  .music-widget{
+    position:fixed;
+    bottom:18px;
+    right:18px;
+    z-index:70;
+    display:flex;
+    align-items:center;
+    gap:0.6rem;
+    background:var(--ink);
+    color:var(--paper-soft);
+    padding:0.6rem 1rem;
+    border-radius:999px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.3);
+    font-family:'Jost', sans-serif;
+    font-size:0.78rem;
+    opacity:0;
+    transform:translateY(12px);
+    pointer-events:none;
+    transition:opacity 0.4s ease, transform 0.4s ease;
+  }
+  .music-widget.show{
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+  }
+  .music-widget button{
+    background:none;
+    color:var(--paper-soft);
+    font-size:1rem;
+    line-height:1;
+    padding:0;
+  }
+  .music-widget a{
+    color:var(--mustard);
+    text-decoration:underline;
+  }
+
+  @media (max-width:560px){
+    .music-widget{ font-size:0.7rem; padding:0.5rem 0.8rem; bottom:14px; right:14px; }
+  }
+
+  .scroll-cue{
+    margin-top:2.4rem;
+    font-family:'Jost', sans-serif;
+    font-size:0.68rem;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--cornflower);
+    opacity:0;
+    transition:opacity 0.6s ease;
+    text-decoration:none;
+  }
+  .scroll-cue.show{ opacity:1; }
+
+  @media (prefers-reduced-motion: reduce){
+    .gift-box{ animation:none; }
+    .gift-lid{ transition:opacity 0.4s ease; }
+    .gift-wrap.opened .gift-lid{ transform:none; }
+    .confetti-piece{ display:none; }
+  }
+
+  /* ============ SHARED SECTION STYLES ============ */
+  section{
+    padding:6rem 6vw;
+    position:relative;
+  }
+  .section-head{
+    text-align:center;
+    max-width:640px;
+    margin:0 auto 3.5rem;
+    position:relative;
+  }
+  .section-head h2{
+    font-size:clamp(1.8rem, 4vw, 2.6rem);
+    font-weight:700;
+    color:var(--ink);
+    margin-top:0.6rem;
+  }
+
+  /* ============ LETTER ============ */
+  .letter-section{ background:var(--paper-soft); }
+  .letter-wrap{
+    display:flex;
+    justify-content:center;
+  }
+  .letter{
+    max-width:640px;
+    width:100%;
+    background:var(--paper);
+    padding:3rem 3rem 2.5rem;
+    box-shadow:0 14px 30px var(--shadow);
+    position:relative;
+    border-radius:4px;
+  }
+  .letter p{
+    font-size:1.05rem;
+    line-height:1.85;
+    margin:0 0 1.2rem;
+  }
+  .letter .sign-off{
+    margin-top:2rem;
+    font-style:italic;
+  }
+  .madi-name{
+    font-family:'Ms Madi', cursive;
+    font-style:normal;
+    font-size:1.7rem;
+    color:var(--coral);
+  }
+  .editable{
+    background:rgba(232,174,59,0.32);
+    padding:0 0.25rem;
+    border-radius:3px;
+  }
+
+  /* ---- daddy's little girl stamp photo ---- */
+  .stamp-wrap{
+    position:relative;
+    max-width:380px;
+    margin:3rem auto 0;
+    padding:1rem 0 2rem;
+  }
+  .stamp-wrap img{
+    display:block;
+    width:100%;
+    height:auto;
+    transform:rotate(-4deg);
+    filter:drop-shadow(0 14px 22px rgba(28,27,24,0.28));
+  }
+  .stamp-wrap .deco{
+    position:absolute;
+  }
+
+  /* ============ DAD JOKES ============ */
+  .jokes{
+    background:var(--cornflower);
+    color:var(--paper-soft);
+    text-align:center;
+  }
+  .jokes .section-head h2{ color:var(--paper-soft); }
+  .jokes .eyebrow{ color:var(--mustard); }
+  .jokes .sub-line{
+    font-style:italic;
+    font-family:'Jost', sans-serif;
+    color:#E7ECFA;
+  }
+
+  .issue-btn{
+    margin-top:1.2rem;
+    background:var(--mustard);
+    color:var(--ink);
+    font-size:0.82rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:1rem 2rem;
+    border-radius:4px;
+    box-shadow:0 6px 0 0 #a9762b;
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .issue-btn:hover{ transform:translateY(2px); box-shadow:0 4px 0 0 #a9762b; }
+  .issue-btn:active{ transform:translateY(5px); box-shadow:0 1px 0 0 #a9762b; }
+
+  .citation-out{
+    max-width:360px;
+    margin:2.5rem auto 0;
+    min-height:200px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .citation-card{
+    background:var(--paper-soft);
+    color:var(--ink);
+    border:2px dashed var(--mustard);
+    border-radius:6px;
+    padding:1.6rem 1.4rem;
+    width:100%;
+    box-shadow:0 12px 26px rgba(0,0,0,0.3);
+    animation: stamp 0.32s ease-out;
+  }
+  @keyframes stamp{
+    0%{ transform:scale(0.7) rotate(-6deg); opacity:0; }
+    60%{ transform:scale(1.08) rotate(2deg); opacity:1; }
+    100%{ transform:scale(1) rotate(-1.5deg); opacity:1; }
+  }
+  .citation-card .num{
+    font-family:'Jost', sans-serif;
+    font-size:0.65rem;
+    letter-spacing:2px;
+    color:var(--coral);
+    margin-bottom:0.6rem;
+  }
+  .citation-card p{
+    font-family:'Jost', sans-serif;
+    font-weight:600;
+    font-size:1.05rem;
+    line-height:1.5;
+    margin:0;
+  }
+  .citation-out .empty{
+    color:#E7ECFA;
+    font-style:italic;
+    font-size:0.95rem;
+  }
+
+  /* ============ FOOTER ============ */
+  footer{
+    background:var(--paper);
+    text-align:center;
+    padding:4rem 6vw 4.5rem;
+    position:relative;
+  }
+  footer p{
+    font-family:'Jost', sans-serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:1.3rem;
+    margin:0.6rem 0 0;
+  }
+
+  @media (max-width:560px){
+    section{ padding:4.5rem 6vw; }
+    .letter{ padding:2.2rem 1.6rem; }
+    .deco.lg{ width:34px; height:34px; }
+    .deco{ width:24px; height:24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- shared sticker symbols -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="ic-star" viewBox="0 0 24 24"><path d="M12 1.5l3.2 7.3 7.8.7-6 5.2 1.9 7.8-7-4.3-7 4.3 1.9-7.8-6-5.2 7.8-.7z"/></symbol>
+    <symbol id="ic-cloud" viewBox="0 0 100 60"><ellipse cx="30" cy="40" rx="22" ry="16"/><ellipse cx="55" cy="30" rx="26" ry="20"/><ellipse cx="78" cy="42" rx="18" ry="14"/><rect x="18" y="38" width="70" height="18" rx="9"/></symbol>
+  </defs>
+</svg>
+
+  <!-- ============ HERO: GIFT BOX ============ -->
+  <section class="hero">
+    <div class="gift-wrap" id="giftWrap" role="button" tabindex="0" aria-label="Open your gift">
+      <div class="gift-lid" id="giftLid">
+        <div class="bow">
+          <span class="bow-loop left"></span>
+          <span class="bow-loop right"></span>
+          <span class="bow-knot"></span>
+        </div>
+      </div>
+      <div class="gift-box"></div>
+    </div>
+
+    <div class="reveal-text" id="revealText">
+      <h1>Happy Father's Day<br>to the <span class="accent">best Baba ever!</span></h1>
+    </div>
+
+    <a href="#letter" class="scroll-cue" id="scrollCue">scroll ↓</a>
+  </section>
+
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
+  <!-- ============ MUSIC WIDGET (YouTube embed, official stream) ============ -->
+  <div class="music-widget" id="musicWidget">
+    <button id="musicToggle" aria-label="Mute or unmute music">🔊</button>
+    <span id="musicLabel">Landslide — Fleetwood Mac</span>
+    <a id="musicFallback" href="#" style="display:none;">▶ tap to play music</a>
+  </div>
+  <audio id="bgAudio" src="audio/landslide.m4a" preload="auto"></audio>
+  <div class="carousel-overlay" id="carouselOverlay">
+    <div class="carousel-box">
+      <button class="carousel-close" id="carouselClose">close ✕</button>
+      <div class="carousel-frame" id="carouselFrame">
+        <img src="photos/photo1.jpg" class="active" alt="Family memory 1">
+        <img src="photos/photo2.jpg" alt="Family memory 2">
+        <img src="photos/photo3.jpg" alt="Family memory 3">
+        <img src="photos/photo4.jpg" alt="Family memory 4">
+        <img src="photos/photo5.jpg" alt="Family memory 5">
+        <img src="photos/photo6.jpg" alt="Family memory 6">
+        <img src="photos/photo7.jpg" alt="Family memory 7">
+        <img src="photos/photo8.jpg" alt="Family memory 8">
+        <img src="photos/photo9.jpg" alt="Family memory 9">
+        <img src="photos/photo10.jpg" alt="Family memory 10">
+        <div class="carousel-arrow prev" id="carouselPrev">‹</div>
+        <div class="carousel-arrow next" id="carouselNext">›</div>
+      </div>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </div>
+
+  <!-- ============ LETTER ============ -->
+  <section class="letter-section" id="letter">
+    <div class="section-head">
+      <div class="deco sm magenta" style="top:-20px; left:14%; transform:rotate(8deg);"><svg><use href="#ic-star"/></svg></div>
+      <p class="eyebrow">a statement, for the record</p>
+      <h2>Dear Baba,</h2>
+    </div>
+    <div class="letter-wrap">
+      <div class="letter">
+        <p>Happy Father's Day, I love you so so much! From being the best gardener to the designated spicy-hot chips and ice-cream buyer, thank you for everything you do for the family. I hope you have the best Father's Day ever!</p>
+        <p class="sign-off">With lots of love,<br><span class="madi-name">Daddy's Little Girl</span></p>
+      </div>
+    </div>
+
+    <div class="stamp-wrap">
+      <div class="deco mustard" style="top:-6px; left:6%; transform:rotate(-16deg);"><svg><use href="#ic-star"/></svg></div>
+      <div class="deco sm coral" style="top:34%; right:-2%; transform:rotate(10deg);"><svg><use href="#ic-star"/></svg></div>
+      <div class="deco sm magenta" style="bottom:8%; left:-4%; transform:rotate(18deg);"><svg><use href="#ic-star"/></svg></div>
+      <div class="deco lg cornflower" style="bottom:-10px; right:10%; transform:rotate(-12deg);"><svg><use href="#ic-star"/></svg></div>
+      <img src="images/daddys_little_girl_stamp.png" alt="Daddy's little girl photo stamp">
+    </div>
+  </section>
+
+  <!-- ============ DAD JOKES ============ -->
+  <section class="jokes">
+    <div class="deco lg mustard" style="top:6%; left:6%; transform:rotate(-14deg);"><svg><use href="#ic-star"/></svg></div>
+    <div class="deco sm coral" style="top:10%; right:8%; transform:rotate(10deg);"><svg><use href="#ic-star"/></svg></div>
+    <div class="section-head">
+      <h2>For such a silly dad,<br>here's a dad joke</h2>
+    </div>
+
+    <button class="issue-btn" id="issueBtn">😂 dad joke</button>
+
+    <div class="citation-out" id="citationOut"></div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="deco sm grass" style="top:14%; left:10%; transform:rotate(-10deg);"><svg><use href="#ic-star"/></svg></div>
+    <div class="deco sm cornflower" style="top:20%; right:10%; transform:rotate(12deg);"><svg><use href="#ic-star"/></svg></div>
+    <p>Happy Father's Day, Baba -- we love you!</p>
+  </footer>
+
+<script>
+  // gift box open + confetti
+  const giftWrap = document.getElementById('giftWrap');
+  const revealText = document.getElementById('revealText');
+  const scrollCue = document.getElementById('scrollCue');
+  const confettiLayer = document.getElementById('confettiLayer');
+  const confettiColors = ['var(--pink)','var(--yellow)','var(--cornflower)','var(--coral)','var(--grass)','var(--magenta)'];
+
+  function spawnConfetti(){
+    const total = 150;
+    for(let i = 0; i < total; i++){
+      const piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      piece.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      piece.style.left = (Math.random() * 100) + 'vw';
+      const w = 6 + Math.random() * 6;
+      piece.style.width = w + 'px';
+      piece.style.height = (w * 1.8) + 'px';
+      const duration = 4.5 + Math.random() * 2;
+      const delay = Math.random() * 4;
+      piece.style.animationDuration = duration + 's';
+      piece.style.animationDelay = delay + 's';
+      piece.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+      confettiLayer.appendChild(piece);
+      setTimeout(() => piece.remove(), (duration + delay) * 1000 + 200);
+    }
+  }
+
+  const bgAudio = document.getElementById('bgAudio');
+
+  function attemptPlay(){
+    const playPromise = bgAudio.play();
+    if(playPromise && playPromise.catch){
+      playPromise.catch(() => showMusicFallback());
+    }
+  }
+
+  function showMusicFallback(){
+    document.getElementById('musicLabel').style.display = 'none';
+    document.getElementById('musicToggle').style.display = 'none';
+    document.getElementById('musicFallback').style.display = 'inline';
+  }
+
+  function openGift(){
+    if(giftWrap.classList.contains('opened')){
+      openCarousel();
+      return;
+    }
+    giftWrap.classList.add('opened');
+    spawnConfetti();
+    setTimeout(() => revealText.classList.add('show'), 300);
+    setTimeout(() => scrollCue.classList.add('show'), 900);
+    setTimeout(() => openCarousel(), 700);
+    attemptPlay();
+    musicWidget.classList.add('show');
+  }
+  giftWrap.addEventListener('click', openGift);
+  giftWrap.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openGift(); }
+  });
+
+  // music widget controls
+  const musicWidget = document.getElementById('musicWidget');
+  const musicToggle = document.getElementById('musicToggle');
+  musicToggle.addEventListener('click', () => {
+    bgAudio.muted = !bgAudio.muted;
+    musicToggle.textContent = bgAudio.muted ? '🔇' : '🔊';
+  });
+  // tapping the widget label or fallback link retries playback (covers blocked-autoplay cases)
+  document.getElementById('musicLabel').addEventListener('click', attemptPlay);
+  document.getElementById('musicFallback').addEventListener('click', (e) => {
+    e.preventDefault();
+    attemptPlay();
+    document.getElementById('musicFallback').style.display = 'none';
+    document.getElementById('musicLabel').style.display = 'inline';
+    document.getElementById('musicToggle').style.display = 'inline';
+  });
+
+  // photo carousel
+  const carouselOverlay = document.getElementById('carouselOverlay');
+  const carouselFrame = document.getElementById('carouselFrame');
+  const carouselImgs = carouselFrame.querySelectorAll('img');
+  const carouselDots = document.getElementById('carouselDots');
+  const carouselPrev = document.getElementById('carouselPrev');
+  const carouselNext = document.getElementById('carouselNext');
+  const carouselClose = document.getElementById('carouselClose');
+  let carouselIndex = 0;
+  let carouselTimer = null;
+
+  carouselImgs.forEach((_, i) => {
+    const dot = document.createElement('span');
+    if(i === 0) dot.classList.add('active');
+    dot.addEventListener('click', () => goToSlide(i));
+    carouselDots.appendChild(dot);
+  });
+  const dotEls = carouselDots.querySelectorAll('span');
+
+  function goToSlide(i){
+    carouselImgs[carouselIndex].classList.remove('active');
+    dotEls[carouselIndex].classList.remove('active');
+    carouselIndex = (i + carouselImgs.length) % carouselImgs.length;
+    carouselImgs[carouselIndex].classList.add('active');
+    dotEls[carouselIndex].classList.add('active');
+  }
+
+  function startAutoplay(){
+    stopAutoplay();
+    carouselTimer = setInterval(() => goToSlide(carouselIndex + 1), 3500);
+  }
+  function stopAutoplay(){
+    if(carouselTimer) clearInterval(carouselTimer);
+  }
+
+  function openCarousel(){
+    carouselOverlay.classList.add('show');
+    startAutoplay();
+  }
+  function closeCarousel(){
+    carouselOverlay.classList.remove('show');
+    stopAutoplay();
+    giftWrap.classList.remove('opened');
+  }
+
+  carouselPrev.addEventListener('click', () => { goToSlide(carouselIndex - 1); startAutoplay(); });
+  carouselNext.addEventListener('click', () => { goToSlide(carouselIndex + 1); startAutoplay(); });
+  carouselClose.addEventListener('click', closeCarousel);
+  carouselOverlay.addEventListener('click', (e) => { if(e.target === carouselOverlay) closeCarousel(); });
+
+  // dad joke citation generator
+  const jokes = [
+    "Why don't skeletons fight each other? They don't have the guts.",
+    "I'm reading a book about anti-gravity. It's impossible to put down.",
+    "Did you hear about the claustrophobic astronaut? He just needed a little space.",
+    "Why did the scarecrow win an award? He was outstanding in his field.",
+    "I used to be a banker, but I lost interest.",
+    "What do you call a fish with no eyes? A fsh.",
+    "I only know 25 letters of the alphabet. I don't know y.",
+    "Why don't eggs tell jokes? They'd crack each other up.",
+    "I'm on a seafood diet. I see food and I eat it.",
+    "What did the ocean say to the beach? Nothing, it just waved.",
+    "Why did the bicycle fall over? It was two-tired.",
+    "I used to hate facial hair, but then it grew on me.",
+    "What do you call cheese that isn't yours? Nacho cheese.",
+    "Why can't you give Elsa a balloon? She'll let it go.",
+    "I would tell you a chemistry joke, but I know I wouldn't get a reaction.",
+    "What's the best thing about Switzerland? I don't know, but the flag is a big plus.",
+    "I tried to catch some fog earlier. I mist.",
+    "Why did the coffee file a police report? It got mugged.",
+    "How does a penguin build its house? Igloos it together.",
+    "I'm friends with all electricians. We have a lot in common, currently.",
+    "What do you call a belt made of watches? A waist of time.",
+    "Why did the golfer bring two pairs of pants? In case he got a hole in one.",
+    "I just got fired from the calendar factory. They said I took a day off.",
+    "Why don't scientists trust atoms? Because they make up everything.",
+    "What do you call a factory that makes okay products? A satisfactory.",
+    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+    "Why did the math book look sad? It had too many problems.",
+    "What's orange and sounds like a parrot? A carrot.",
+    "I'm trying to organize a hide and seek competition, but it's hard. Good players are hard to find.",
+    "Why did the picture go to jail? It was framed."
+  ];
+
+  let citationCount = 0;
+  const issueBtn = document.getElementById('issueBtn');
+  const citationOut = document.getElementById('citationOut');
+
+  issueBtn.addEventListener('click', () => {
+    citationCount++;
+    const joke = jokes[Math.floor(Math.random() * jokes.length)];
+    const num = String(citationCount).padStart(5, '0');
+    citationOut.innerHTML = `
+      <div class="citation-card">
+        <div class="num">CITATION NO. ${num}</div>
+        <p>${joke}</p>
+      </div>
+    `;
+  });
+</script>
+
+</body>
+</html>
